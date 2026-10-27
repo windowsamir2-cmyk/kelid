@@ -1,38 +1,144 @@
+
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
 import './style.css';
 
 const sites = [
-  { name: 'تأمین اجتماعی', category: 'خدمات دولتی', url: 'https://es.tamin.ir/', icon: '🩺', color: 'mint' },
-  { name: 'بیمه سلامت', category: 'بیمه', url: 'https://ihio.gov.ir/', icon: '🏥', color: 'blue' },
-  { name: 'ثبت احوال', category: 'مدارک هویتی', url: 'https://sabteahval.ir/', icon: '🪪', color: 'purple' },
-  { name: 'پلیس +۱۰', category: 'خدمات انتظامی', url: 'https://epolice.ir/', icon: '👮', color: 'gold' },
-  { name: 'سازمان امور مالیاتی', category: 'مالیات', url: 'https://my.tax.gov.ir/', icon: '🧾', color: 'mint' },
-  { name: 'پست', category: 'پیگیری مرسوله', url: 'https://post.ir/', icon: '📦', color: 'blue' },
-  { name: 'دولت من', category: 'خدمات دولتی', url: 'https://my.gov.ir/', icon: '🇮🇷', color: 'purple' },
-  { name: 'بیمه ایران', category: 'بیمه', url: 'https://bimehiran.com/', icon: '🛡️', color: 'gold' },
-  { name: 'مدیو', category: 'آموزش و پرورش', url: 'https://medu.ir/', icon: '🎓', color: 'blue' },
-  { name: 'همراه اول', category: 'اپراتور تلفن', url: 'https://mci.ir/', icon: '📱', color: 'mint' },
-  { name: 'ایرانسل', category: 'اپراتور تلفن', url: 'https://irancell.ir/', icon: '📶', color: 'gold' },
-  { name: 'رایتل', category: 'اپراتور تلفن', url: 'https://rightel.ir/', icon: '📡', color: 'purple' },
-  { name: 'کالابرگ', category: 'خدمات حمایتی', url: 'https://kalabarg.ir/', icon: '🛒', color: 'mint' },
+  {
+    name: 'تأمین اجتماعی',
+    category: 'خدمات دولتی',
+    url: 'https://es.tamin.ir/',
+    icon: '🩺',
+    color: 'mint'
+  },
+  {
+    name: 'بیمه سلامت',
+    category: 'بیمه',
+    url: 'https://ihio.gov.ir/',
+    icon: '🏥',
+    color: 'blue'
+  },
+  {
+    name: 'ثبت احوال',
+    category: 'مدارک هویتی',
+    url: 'https://sabteahval.ir/',
+    icon: '🪪',
+    color: 'purple'
+  },
+  {
+    name: 'پلیس +۱۰',
+    category: 'خدمات انتظامی',
+    url: 'https://epolice.ir/',
+    icon: '👮',
+    color: 'gold'
+  },
+  {
+    name: 'سازمان امور مالیاتی',
+    category: 'مالیات',
+    url: 'https://my.tax.gov.ir/',
+    icon: '🧾',
+    color: 'mint'
+  },
+  {
+    name: 'پست',
+    category: 'پیگیری مرسوله',
+    url: 'https://post.ir/',
+    icon: '📦',
+    color: 'blue'
+  },
+  {
+    name: 'دولت من',
+    category: 'خدمات دولتی',
+    url: 'https://my.gov.ir/',
+    icon: '🇮🇷',
+    color: 'purple'
+  },
+  {
+    name: 'بیمه ایران',
+    category: 'بیمه',
+    url: 'https://iraninsurance.ir/',
+    icon: '🛡️',
+    color: 'gold'
+  },
+  {
+    name: 'مدیو',
+    category: 'آموزش و پرورش',
+    url: 'https://medu.ir/',
+    icon: '🎓',
+    color: 'blue'
+  },
+  {
+    name: 'همراه اول',
+    category: 'اپراتور تلفن',
+    url: 'https://mci.ir/',
+    icon: '📱',
+    color: 'mint'
+  },
+  {
+    name: 'ایرانسل',
+    category: 'اپراتور تلفن',
+    url: 'https://irancell.ir/',
+    icon: '📶',
+    color: 'gold'
+  },
+  {
+    name: 'رایتل',
+    category: 'اپراتور تلفن',
+    url: 'https://rightel.ir/',
+    icon: '📡',
+    color: 'purple'
+  },
+  {
+    name: 'کالابرگ',
+    category: 'خدمات حمایتی',
+    url: 'https://ble.ir/6369',
+    icon: '🛒',
+    color: 'mint'
+  }
 ];
 
 const app = document.querySelector('#app');
+
 app.innerHTML = `
   <main class="shell">
     <header class="top">
       <div class="brand-mark">ر</div>
-      <div class="brand-copy"><h1>کلید</h1><p>خدمات پرکاربرد، یک‌جا و سریع</p></div>
+
+      <div class="brand-copy">
+        <h1>کلید</h1>
+        <p>خدمات پرکاربرد، یک‌جا و سریع</p>
+      </div>
+
       <span class="flag">IR</span>
     </header>
+
     <section class="welcome">
-      <div><span class="eyebrow">خوش اومدی 👋</span><h2>کجا می‌خوای بری؟</h2>
-      <p>سرویس موردنظرت رو انتخاب کن تا بازش کنیم.</p></div>
+      <div>
+        <span class="eyebrow">خوش اومدی 👋</span>
+        <h2>کجا می‌خوای بری؟</h2>
+        <p>سرویس موردنظرت رو انتخاب کن تا بازش کنیم.</p>
+      </div>
+
       <div class="welcome-art">✦</div>
     </section>
-    <label class="search"><span>⌕</span><input id="search" type="search" placeholder="جست‌وجوی خدمات..." autocomplete="off"><kbd>/</kbd></label>
-    <div class="section-heading"><h3>دسترسی سریع</h3><span id="count"></span></div>
+
+    <label class="search">
+      <span>⌕</span>
+      <input
+        id="search"
+        type="search"
+        placeholder="جست‌وجوی خدمات..."
+        autocomplete="off"
+        aria-label="جست‌وجوی خدمات"
+      >
+      <kbd>/</kbd>
+    </label>
+
+    <div class="section-heading">
+      <h3>دسترسی سریع</h3>
+      <span id="count"></span>
+    </div>
+
     <nav class="filters" aria-label="دسته‌بندی">
       <button class="filter active" data-filter="همه">همه</button>
       <button class="filter" data-filter="خدمات دولتی">دولتی</button>
@@ -40,62 +146,138 @@ app.innerHTML = `
       <button class="filter" data-filter="اپراتور تلفن">اپراتورها</button>
       <button class="filter" data-filter="آموزش و پرورش">آموزش</button>
     </nav>
+
     <section id="grid" class="grid" aria-live="polite"></section>
-    <footer><span class="footer-dot"></span> لینک‌ها به وب‌سایت‌های رسمی یا معرفی‌شده هدایت می‌شوند.</footer>
+
+    <footer>
+      <span class="footer-dot"></span>
+      لینک‌ها به وب‌سایت‌ها یا سرویس‌های مربوط هدایت می‌شوند.
+    </footer>
   </main>
+
   <div id="toast" role="status" class="toast"></div>
 `;
 
 let selectedCategory = 'همه';
+
 const grid = document.querySelector('#grid');
 const search = document.querySelector('#search');
 const count = document.querySelector('#count');
 const toast = document.querySelector('#toast');
 
-function render() {
-  const query = search.value.trim().toLocaleLowerCase('fa');
-  const shown = sites.filter(s =>
-    (selectedCategory === 'همه' || s.category === selectedCategory) &&
-    (s.name.toLocaleLowerCase('fa').includes(query) || s.category.toLocaleLowerCase('fa').includes(query))
-  );
-  count.textContent = `${shown.length} سرویس`;
-  grid.innerHTML = shown.map((s) => `
-    <button class="site-card" data-url="${s.url}" aria-label="باز کردن ${s.name}">
-      <span class="site-icon ${s.color}">${s.icon}</span>
-      <span class="site-name">${s.name}</span>
-      <span class="site-category">${s.category}</span>
-      <span class="card-arrow">↗</span>
-    </button>
-  `).join('') || '<p class="empty">چیزی پیدا نشد؛ عبارت دیگه‌ای رو امتحان کن.</p>';
+let toastTimer;
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+
+  clearTimeout(toastTimer);
+
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
 }
 
-document.querySelector('.filters').addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-filter]');
-  if (!btn) return;
-  selectedCategory = btn.dataset.filter;
-  document.querySelectorAll('.filter').forEach(b => b.classList.toggle('active', b === btn));
+function render() {
+  const query = search.value.trim().toLocaleLowerCase('fa');
+
+  const shown = sites.filter((site) => {
+    const matchesCategory =
+      selectedCategory === 'همه' ||
+      site.category === selectedCategory;
+
+    const matchesSearch =
+      site.name.toLocaleLowerCase('fa').includes(query) ||
+      site.category.toLocaleLowerCase('fa').includes(query);
+
+    return matchesCategory && matchesSearch;
+  });
+
+  count.textContent = `${shown.length} سرویس`;
+
+  grid.innerHTML = shown.map((site) => `
+    <button
+      class="site-card"
+      data-url="${site.url}"
+      aria-label="باز کردن ${site.name}"
+      type="button"
+    >
+      <span class="site-icon ${site.color}">${site.icon}</span>
+      <span class="site-name">${site.name}</span>
+      <span class="site-category">${site.category}</span>
+      <span class="card-arrow">↗</span>
+    </button>
+  `).join('') || `
+    <p class="empty">
+      چیزی پیدا نشد؛ عبارت دیگه‌ای رو امتحان کن.
+    </p>
+  `;
+}
+
+document.querySelector('.filters').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-filter]');
+
+  if (!button) return;
+
+  selectedCategory = button.dataset.filter;
+
+  document.querySelectorAll('.filter').forEach((item) => {
+    item.classList.toggle('active', item === button);
+  });
+
   render();
 });
+
 search.addEventListener('input', render);
-grid.addEventListener('click', async (e) => {
-  const card = e.target.closest('[data-url]');
+
+grid.addEventListener('click', async (event) => {
+  const card = event.target.closest('[data-url]');
+
   if (!card) return;
+
   const url = card.dataset.url;
+
   try {
-    if (Capacitor.isNativePlatform()) {
-      await Browser.open({ url, presentationStyle: 'popover' });
-    } else {
-      window.open(url, '_blank', 'noopener,noreferrer');
+    // آدرس فقط از فهرست تعریف‌شدهٔ سایت‌ها انتخاب می‌شود.
+    const validSite = sites.some((site) => site.url === url);
+
+    if (!validSite) {
+      showToast('آدرس این سرویس معتبر نیست.');
+      return;
     }
-  } catch {
-    toast.textContent = 'باز کردن سایت ممکن نشد. اتصال اینترنت رو بررسی کن.';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2800);
+
+    if (Capacitor.isNativePlatform()) {
+      await Browser.open({ url });
+    } else {
+      const openedWindow = window.open(
+        url,
+        '_blank',
+        'noopener,noreferrer'
+      );
+
+      if (!openedWindow) {
+        showToast('مرورگر اجازهٔ باز کردن صفحه را نداد.');
+      }
+    }
+  } catch (error) {
+    console.error('Failed to open site:', error);
+
+    showToast(
+      'باز کردن سایت ممکن نشد. اتصال اینترنت یا آدرس سایت را بررسی کن.'
+    );
   }
 });
-document.addEventListener('keydown', (e) => {
-  if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-    e.preventDefault(); search.focus();
+
+document.addEventListener('keydown', (event) => {
+  const activeTag = document.activeElement?.tagName;
+
+  if (
+    event.key === '/' &&
+    !['INPUT', 'TEXTAREA'].includes(activeTag)
+  ) {
+    event.preventDefault();
+    search.focus();
   }
 });
+
 render();
