@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout project
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -34,25 +34,19 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
-          cache: gradle
+          java-version: '21'
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Check Capacitor configuration
-        run: npx cap --version
-
-      - name: Add Android platform if missing
+      - name: Prepare Capacitor Android
         run: |
           if [ ! -d android ]; then
             npx cap add android
           fi
+          npx cap sync android
 
-      - name: Sync Android project
-        run: npx cap sync android
-
-      - name: Build debug APK
+      - name: Build APK
         run: |
           cd android
           chmod +x gradlew
@@ -61,7 +55,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: kelid-debug-apk
+          name: Kelid-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          retention-days: 7
