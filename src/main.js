@@ -219,8 +219,9 @@ function normalizePhone(value) {
 }
 
 function emailFromPhone(phone) {
-  return `${phone.replace('+', '')}@login.kelid.invalid`;
+  return `${phone.replace(/\D/g, '')}@kelid.app`;
 }
+
 
 function showForm(mode) {
   authMessage.textContent = '';
