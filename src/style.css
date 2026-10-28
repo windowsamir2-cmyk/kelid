@@ -54,3 +54,8 @@ body{min-width:320px;background:radial-gradient(ellipse at 50% 0%,#073c88 0,tran
 #avatar-preview:not(.has-avatar){opacity:0}
 #avatar-placeholder{position:relative;z-index:1;font-size:38px;color:#bcefff}
 #avatar-placeholder.hidden{display:none}
+
+/* Clear gender selection feedback */
+.gender-options button{display:flex;align-items:center;justify-content:center;gap:8px;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease}
+.gender-options button.active::after{content:'✓';display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#fff;color:#0069ff;font-size:14px;font-weight:900;line-height:1;box-shadow:0 0 8px #ffffff70}
+.gender-options button:focus-visible{outline:2px solid #55e5ff;outline-offset:3px}
