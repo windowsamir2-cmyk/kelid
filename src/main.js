@@ -297,7 +297,7 @@ $('#save-profile').addEventListener('click', async () => {
     if (!firstName || !lastName) throw new Error('نام و نام خانوادگی را وارد کن.');
     if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) throw new Error('نام کاربری باید ۳ تا ۲۰ نویسه معتبر باشد.');
     if (!profileGender) throw new Error('جنسیت را انتخاب کن.');
-    if (age !== '' && (!Number.isInteger(age) || age < 1 || age > 120)) throw new Error('سن باید بین ۱ تا ۱۲۰ باشد.');
+    if (age !== '' && (!Number.isInteger(age) || age < 16 || age > 120)) throw new Error('سن باید بیشتر از ۱۵ سال باشد (حداقل ۱۶ سال).');
     if (password && password.length < 8) throw new Error('رمز جدید باید حداقل ۸ نویسه باشد.');
     if (Object.entries(accounts).some(([p,a]) => p !== oldPhone && (p === newPhone || (a.username || '').toLowerCase() === username))) throw new Error('شماره یا نام کاربری قبلاً استفاده شده است.');
     const avatarImg = $('#avatar-preview');
