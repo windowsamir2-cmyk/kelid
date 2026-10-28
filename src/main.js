@@ -286,8 +286,31 @@ $('#close-profile').addEventListener('click', () => { $('#profile-panel').classL
 $('#profile-panel').querySelectorAll('[data-gender]').forEach(b => b.addEventListener('click', () => { profileGender = b.dataset.gender; $('#profile-panel').querySelectorAll('[data-gender]').forEach(x => x.classList.toggle('active', x === b)); }));
 $('#avatar-file').addEventListener('change', () => {
   const file = $('#avatar-file').files?.[0]; if (!file) return;
-  if (!file.type.startsWith('image/') || file.size > 700 * 1024) { $('#profile-message').textContent = 'فقط عکس تا حجم ۷۰۰ کیلوبایت انتخاب کن.'; return; }
-  const reader = new FileReader(); reader.onload = () => { const img = $('#avatar-preview'); img.onload = () => { img.classList.add('has-avatar'); $('#avatar-placeholder').classList.add('hidden'); }; img.onerror = () => { $('#profile-message').textContent = 'نمایش این عکس ممکن نشد؛ عکس دیگری انتخاب کن.'; }; img.src = reader.result; img.dataset.changed = '1'; }; reader.readAsDataURL(file);
+  if (!file.type.startsWith('image/')) { $('#profile-message').textContent = 'لطفاً یک فایل تصویری انتخاب کن.'; return; }
+  if (file.size > 10 * 1024 * 1024) { $('#profile-message').textContent = 'حجم عکس نباید بیشتر از ۱۰ مگابایت باشد.'; return; }
+  const reader = new FileReader();
+  reader.onerror = () => { $('#profile-message').textContent = 'خواندن عکس ناموفق بود؛ دوباره امتحان کن.'; };
+  reader.onload = () => {
+    const source = new Image();
+    source.onerror = () => { $('#profile-message').textContent = 'باز کردن این عکس ممکن نشد؛ عکس دیگری انتخاب کن.'; };
+    source.onload = () => {
+      const maxSide = 512, scale = Math.min(1, maxSide / Math.max(source.naturalWidth, source.naturalHeight));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(source.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(source.naturalHeight * scale));
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { $('#profile-message').textContent = 'پردازش عکس در این دستگاه ممکن نشد.'; return; }
+      ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.78);
+      const img = $('#avatar-preview');
+      img.onload = () => { img.classList.add('has-avatar'); $('#avatar-placeholder').classList.add('hidden'); };
+      img.onerror = () => { $('#profile-message').textContent = 'نمایش این عکس ممکن نشد؛ عکس دیگری انتخاب کن.'; };
+      img.src = compressed; img.dataset.changed = '1';
+      $('#profile-message').textContent = 'عکس انتخاب شد؛ با ذخیره تغییرات ثبت می‌شود.';
+    };
+    source.src = reader.result;
+  };
+  reader.readAsDataURL(file);
 });
 $('#save-profile').addEventListener('click', async () => {
   try {
@@ -304,7 +327,7 @@ $('#save-profile').addEventListener('click', async () => {
     const updated = {...account, firstName, lastName, username, gender: profileGender, age, avatar: avatarImg.dataset.changed === '1' ? avatarImg.src : (account.avatar || '')};
     if (password) { const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16))); updated.salt = salt; updated.passwordHash = await hashPassword(password, salt); }
     if (newPhone !== oldPhone) delete accounts[oldPhone]; accounts[newPhone] = updated; writeAccounts(accounts); localStorage.setItem('kelid.sessionPhone', newPhone);
-    currentProfile = {...updated, phone:newPhone}; $('#welcome-title').textContent = 'سلام ' + firstName + ' عزیز!'; updateWelcomeAvatar(); $('#profile-message').textContent = 'تغییرات ذخیره شد.'; showToast('پروفایل به‌روزرسانی شد.');
+    currentProfile = {...updated, phone:newPhone}; $('#welcome-title').textContent = 'سلام ' + firstName + ' عزیز!'; $('#profile-message').textContent = 'تغییرات ذخیره شد.'; showToast('پروفایل به‌روزرسانی شد.');
   } catch (e) { $('#profile-message').textContent = e.message || 'ذخیره انجام نشد.'; }
 });
 $('#show-signup').addEventListener('click', () => showForm('signup'));
