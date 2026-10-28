@@ -48,6 +48,21 @@ jobs:
           fi
           npx cap sync android
 
+      - name: Apply KELID launcher icon
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+          mkdir -p android/app/src/main/res/mipmap-mdpi android/app/src/main/res/mipmap-hdpi android/app/src/main/res/mipmap-xhdpi android/app/src/main/res/mipmap-xxhdpi android/app/src/main/res/mipmap-xxxhdpi
+          for spec in "mdpi 48" "hdpi 72" "xhdpi 96" "xxhdpi 144" "xxxhdpi 192"; do
+            set -- $spec
+            density="$1"
+            size="$2"
+            convert public/kelid-icon.svg -background none -resize "${size}x${size}" "android/app/src/main/res/mipmap-${density}/ic_launcher.png"
+            cp "android/app/src/main/res/mipmap-${density}/ic_launcher.png" "android/app/src/main/res/mipmap-${density}/ic_launcher_round.png"
+          done
+          # Ensure Android uses the KELID launcher label.
+          sed -i 's#<string name="app_name">.*</string>#<string name="app_name">KELID</string>#' android/app/src/main/res/values/strings.xml
+
       - name: Build APK
         run: |
           cd android
