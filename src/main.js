@@ -60,7 +60,7 @@ app.innerHTML = `
       <input id="profile-username" placeholder="نام کاربری (انگلیسی)" /><input id="profile-phone" placeholder="شماره موبایل" inputmode="tel" />
       <p>جنسیت</p><div class="gender-options"><button type="button" data-gender="مرد">مرد</button><button type="button" data-gender="زن">زن</button></div>
       <input id="profile-password" type="password" placeholder="رمز جدید (اختیاری)" />
-      <button id="save-profile" type="button">ذخیره تغییرات</button><button id="close-profile" class="secondary" type="button">بازگشت به خدمات</button>
+      <button id="save-profile" type="button">ذخیره تغییرات</button><button id="logout-button" type="button">خروج از حساب</button><button id="close-profile" class="secondary" type="button">بازگشت به خدمات</button>
     </section>
 
     <section id="home" class="auth-hidden">
@@ -74,7 +74,7 @@ app.innerHTML = `
       </div>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
-        <button id="profile-button" type="button">👤 پروفایل</button><button id="logout-button">خروج از حساب</button>
+        <button id="profile-button" type="button">👤 پروفایل</button>
       </div>
 
       <label class="search">
