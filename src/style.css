@@ -47,3 +47,10 @@ body{min-width:320px;background:radial-gradient(ellipse at 50% 0%,#073c88 0,tran
 .gender-options button{flex:1;background:#061a3b;color:#9ecbff;border:1px solid #174b8b;box-shadow:none}
 .gender-options button.active{background:linear-gradient(120deg,#0069ff,#087bff);border-color:#22d7ff;color:#fff;box-shadow:0 0 15px #008cff55}
 .signup-gender{margin:4px 0 10px}
+
+/* Fix avatar rendering: image and placeholder share one circular frame */
+.avatar-frame{position:relative;width:104px;height:104px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:radial-gradient(circle at 35% 25%,#0b3470,#04162e 70%);border:2px solid #18cfff;box-shadow:0 0 22px #007bff50}
+#avatar-preview{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;border:0;border-radius:50%;background:transparent;z-index:2}
+#avatar-preview:not(.has-avatar){opacity:0}
+#avatar-placeholder{position:relative;z-index:1;font-size:38px;color:#bcefff}
+#avatar-placeholder.hidden{display:none}
