@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#020817"/><stop offset="1" stop-color="#061b49"/></linearGradient>
+ <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#70ffff"/><stop offset=".48" stop-color="#00bfff"/><stop offset="1" stop-color="#145bff"/></linearGradient>
+ <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="512" height="512" rx="112" fill="url(#bg)"/>
+<rect x="24" y="24" width="464" height="464" rx="96" fill="none" stroke="#007bff" stroke-width="5" opacity=".9"/>
+<g filter="url(#glow)" stroke="url(#neon)" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M155 315 C119 280 115 221 146 181 C181 136 240 126 285 147" fill="none" stroke-width="18" opacity=".75"/>
+ <path d="M178 355 L299 234" fill="none" stroke-width="47"/>
+ <circle cx="335" cy="198" r="64" fill="none" stroke-width="27"/>
+ <path d="M195 340 l-4 34 -34 0 -4 25 -34 0" fill="none" stroke-width="20"/>
+ <circle cx="319" cy="302" r="15" fill="url(#neon)" stroke="none"/>
+ <path d="M291 347 Q265 320 249 338 Q235 356 286 390 Q337 356 323 338 Q307 320 291 347Z" fill="url(#neon)" stroke="none"/>
+</g>
+</svg>
