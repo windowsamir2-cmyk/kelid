@@ -286,6 +286,7 @@ function showProfile() {
   if (savedAvatar) { img.src = savedAvatar; } else { img.removeAttribute('src'); $('#avatar-placeholder').classList.remove('hidden'); }
 }
 $('#profile-button').addEventListener('click', showProfile);
+$('#welcome-avatar-button').addEventListener('click', showProfile);
 $('#close-profile').addEventListener('click', () => { $('#profile-panel').classList.add('auth-hidden'); home.classList.remove('auth-hidden'); });
 $('#profile-panel').querySelectorAll('[data-gender]').forEach(b => b.addEventListener('click', () => { profileGender = b.dataset.gender; $('#profile-panel').querySelectorAll('[data-gender]').forEach(x => x.classList.toggle('active', x === b)); }));
 $('#avatar-file').addEventListener('change', () => {
@@ -331,7 +332,7 @@ $('#save-profile').addEventListener('click', async () => {
     const updated = {...account, firstName, lastName, username, gender: profileGender, age, avatar: avatarImg.dataset.changed === '1' ? avatarImg.src : (account.avatar || '')};
     if (password) { const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16))); updated.salt = salt; updated.passwordHash = await hashPassword(password, salt); }
     if (newPhone !== oldPhone) delete accounts[oldPhone]; accounts[newPhone] = updated; writeAccounts(accounts); localStorage.setItem('kelid.sessionPhone', newPhone);
-    currentProfile = {...updated, phone:newPhone}; $('#welcome-title').textContent = 'سلام ' + firstName + ' عزیز!'; $('#profile-message').textContent = 'تغییرات ذخیره شد.'; showToast('پروفایل به‌روزرسانی شد.');
+    currentProfile = {...updated, phone:newPhone}; $('#welcome-title').textContent = 'سلام ' + firstName + ' عزیز!'; updateWelcomeAvatar(); $('#profile-message').textContent = 'تغییرات ذخیره شد.'; showToast('پروفایل به‌روزرسانی شد.');
   } catch (e) { $('#profile-message').textContent = e.message || 'ذخیره انجام نشد.'; }
 });
 $('#show-signup').addEventListener('click', () => showForm('signup'));
