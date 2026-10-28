@@ -12,66 +12,20 @@ const sites = [
   { name: 'دولت من', category: 'خدمات دولتی', url: 'https://my.gov.ir/', icon: '🇮🇷', color: 'purple' },
   { name: 'بیمه ایران', category: 'بیمه', url: 'https://iraninsurance.ir/', icon: '🛡️', color: 'gold' },
   { name: 'مدیو', category: 'آموزش و پرورش', url: 'https://medu.ir/', icon: '🎓', color: 'blue' },
-  { name: 'همراه اول', category: 'اپراتور تلفن', url: 'https://mci.ir/', icon: '📱', color: 'mint' },
-  { name: 'ایرانسل', category: 'اپراتور تلفن', url: 'https://irancell.ir/', icon: '📶', color: 'gold' },
-  { name: 'رایتل', category: 'اپراتور تلفن', url: 'https://rightel.ir/', icon: '📡', color: 'purple' },
-  { name: 'کالابرگ', category: 'خدمات حمایتی', url: 'https://ble.ir/6369', icon: '🛒', color: 'mint' }
+  { name: 'همراه اول', category: 'اپراتور تلفن', url: 'https://mci.ir/', icon: 'mci', color: 'mci-logo' },
+  { name: 'ایرانسل', category: 'اپراتور تلفن', url: 'https://irancell.ir/', icon: 'irancell', color: 'irancell-logo' },
+  { name: 'رایتل', category: 'اپراتور تلفن', url: 'https://rightel.ir/', icon: 'rightel', color: 'rightel-logo' },
+  { name: 'کالابرگ', category: 'خدمات حمایتی', url: 'https://kala.sfara.ir/', icon: '🛒', color: 'mint' }
 ];
 
 const app = document.querySelector('#app');
 
 app.innerHTML = `
   <style>
-    .auth-wrap {
-      max-width: 440px;
-      margin: 28px auto;
-      padding: 22px;
-      border-radius: 22px;
-      background: var(--card, #fff);
-      box-shadow: 0 8px 28px #00000012;
-    }
-    .auth-wrap h2, .auth-wrap p { text-align: center; }
-    .auth-wrap input, .auth-wrap button, .auth-wrap select {
-      box-sizing: border-box;
-      width: 100%;
-      padding: 13px;
-      margin: 7px 0;
-      border-radius: 12px;
-      border: 1px solid #d5dbe3;
-      font: inherit;
-    }
-    .auth-wrap button {
-      cursor: pointer;
-      background: #176b55;
-      color: white;
-      border: 0;
-    }
-    .auth-wrap button.secondary {
-      background: #e9f3ef;
-      color: #176b55;
-    }
-    .auth-wrap .hint {
-      font-size: 13px;
-      opacity: .8;
-      line-height: 1.9;
-    }
-    .auth-wrap .msg {
-      padding: 10px;
-      border-radius: 10px;
-      line-height: 1.8;
-      overflow-wrap: anywhere;
-    }
-    .auth-wrap .error {
-      background: #ffeded;
-      color: #9b2020;
-    }
-    .auth-wrap .ok {
-      background: #e8f8ed;
-      color: #176b35;
-    }
-    .auth-wrap .row { display: flex; gap: 8px; }
-    .auth-wrap .row button { flex: 1; }
-    .auth-hidden { display: none !important; }
+    .auth-wrap{max-width:520px;margin:28px auto;padding:clamp(18px,5vw,30px);border-radius:28px;background:rgba(2,12,38,.88);border:1px solid #087bff;box-shadow:0 0 35px #006bff2b,inset 0 0 28px #073a7b30;color:#e8f5ff;backdrop-filter:blur(16px)}
+    .auth-hero{text-align:center;padding:14px 0 25px}.key-orb{width:116px;height:116px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;font-size:68px;color:#e9fbff;background:radial-gradient(circle at 35% 25%,#1b8bff,#00245c 65%);border:3px solid #14d8ff;box-shadow:0 0 18px #008cff,0 0 50px #006aff80,inset 0 0 20px #52dfff70}.auth-hero h2{font-size:38px;margin:4px 0;color:#fff;text-shadow:0 0 18px #168dff}.auth-hero p{margin:0;color:#36cfff;font-size:14px}
+    .auth-tabs{display:flex;gap:8px;padding:5px;background:#001431;border:1px solid #0756ad;border-radius:16px;margin-bottom:18px}.auth-tabs button{flex:1!important;width:auto!important;margin:0!important;background:transparent!important;color:#9bc9ff!important;border:1px solid transparent!important;padding:12px!important}.auth-tabs button.active{background:linear-gradient(120deg,#0069ff,#087bff)!important;color:#fff!important;border-color:#22d7ff!important;box-shadow:0 0 16px #008cff70}
+    .auth-wrap h3{margin:12px 0;text-align:center;color:#eaf7ff}.auth-wrap input,.auth-wrap button,.auth-wrap select{box-sizing:border-box;width:100%;padding:14px;margin:7px 0;border-radius:14px;border:1px solid #286bc0;background:#041a3c;color:#f4faff;font:inherit;outline:none}.auth-wrap input::placeholder{color:#82a7d5}.auth-wrap input:focus{border-color:#18d7ff;box-shadow:0 0 0 3px #008cff25}.auth-wrap button{cursor:pointer;background:linear-gradient(110deg,#0062ff,#087cff);color:white;border:1px solid #14d8ff;box-shadow:0 0 17px #006dff55;font-weight:700}.auth-wrap button.secondary{background:#061a3b;color:#9ecbff;border-color:#174b8b;box-shadow:none}.auth-wrap .hint{font-size:11px;opacity:.8;line-height:1.9;color:#9cbbe4}.auth-wrap .msg{padding:10px;border-radius:10px;line-height:1.8;overflow-wrap:anywhere}.auth-wrap .error{background:#401a32;color:#ffc3d6}.auth-wrap .ok{background:#073e43;color:#b8fff5}.auth-wrap .row{display:flex;gap:8px}.auth-wrap .row button{flex:1}.auth-hidden{display:none!important}
   </style>
 
   <main class="shell">
@@ -85,10 +39,15 @@ app.innerHTML = `
     </header>
 
     <section id="auth" class="auth-wrap">
-      <h2>به کلید خوش آمدی 🔑</h2>
-      <p>برای ادامه، یکی از گزینه‌ها را انتخاب کن.</p>
-      <button id="show-login">ورود به حساب</button>
-      <button id="show-signup" class="secondary">ثبت‌نام کاربر جدید</button>
+      <div class="auth-hero">
+        <div class="key-orb" aria-hidden="true">⚿</div>
+        <h2>کلید</h2>
+        <p>همه‌ی خدمات، در یک کلید</p>
+      </div>
+      <div class="auth-tabs">
+        <button id="show-login" class="active" type="button">ورود</button>
+        <button id="show-signup" class="secondary" type="button">ثبت‌نام</button>
+      </div>
       <div id="auth-form"></div>
       <div id="auth-message" role="status"></div>
     </section>
@@ -217,8 +176,10 @@ function showForm(mode) {
   authMessage.textContent = '';
   const signup = mode === 'signup';
 
+  $('#show-login').classList.toggle('active', !signup);
+  $('#show-signup').classList.toggle('active', signup);
   authForm.innerHTML = `
-    <h3>${signup ? 'ثبت‌نام' : 'ورود به حساب'}</h3>
+    <h3>${signup ? 'ساخت حساب جدید' : 'ورود به حساب'}</h3>
     ${signup ? `
       <input id="first-name" placeholder="نام" autocomplete="given-name" required>
       <input id="last-name" placeholder="نام خانوادگی" autocomplete="family-name" required>
@@ -305,7 +266,7 @@ function renderServices() {
       aria-label="باز کردن ${site.name}"
       type="button"
     >
-      <span class="site-icon ${site.color}">${site.icon}</span>
+      <span class="site-icon ${site.color}">${['mci','irancell','rightel'].includes(site.icon) ? `<span class="operator-wordmark ${site.icon}">${site.icon === 'mci' ? 'MCI' : site.icon === 'irancell' ? 'ایرانسل' : 'رایتل'}</span>` : site.icon}</span>
       <span class="site-name">${site.name}</span>
       <span class="site-category">${site.category}</span>
       <span class="card-arrow">↗</span>
@@ -378,6 +339,8 @@ $('#logout-button').addEventListener('click', () => {
   currentProfile = null;
   authForm.innerHTML = '';
   authMessage.textContent = '';
+  $('#show-login').classList.add('active');
+  $('#show-signup').classList.remove('active');
   authBox.classList.remove('auth-hidden');
   home.classList.add('auth-hidden');
   showToast('از حساب خارج شدی.');
