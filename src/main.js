@@ -66,11 +66,15 @@ app.innerHTML = `
 
     <section id="home" class="auth-hidden">
       <div class="welcome">
-        <div>
+        <div class="welcome-copy">
           <span class="eyebrow">خوش اومدی 👋</span>
           <h2 id="welcome-title">کجا می‌خوای بری؟</h2>
           <p>سرویس موردنظرت رو انتخاب کن تا بازش کنیم.</p>
         </div>
+        <button id="welcome-avatar-button" class="welcome-avatar-button" type="button" aria-label="باز کردن پروفایل">
+          <img id="welcome-avatar" alt="" />
+          <span id="welcome-avatar-fallback">👤</span>
+        </button>
         <div class="welcome-art">✦</div>
       </div>
 
