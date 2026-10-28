@@ -15,7 +15,7 @@ const sites = [
   { name: 'همراه اول', category: 'اپراتور تلفن', url: 'https://mci.ir/', icon: 'mci', color: 'mci-logo' },
   { name: 'ایرانسل', category: 'اپراتور تلفن', url: 'https://irancell.ir/', icon: 'irancell', color: 'irancell-logo' },
   { name: 'رایتل', category: 'اپراتور تلفن', url: 'https://rightel.ir/', icon: 'rightel', color: 'rightel-logo' },
-  { name: 'کالابرگ', category: 'خدمات حمایتی', url: 'https://kala.sfara.ir/', icon: '🛒', color: 'mint' }
+  { name: 'کالابرگ', category: 'خدمات حمایتی', url: 'https://my.gov.ir/', icon: '🛒', color: 'mint' }
 ];
 
 const app = document.querySelector('#app');
