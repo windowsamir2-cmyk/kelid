@@ -58,6 +58,7 @@ app.innerHTML = `
       <div id="profile-message" role="status"></div>
       <input id="profile-first" placeholder="نام" /><input id="profile-last" placeholder="نام خانوادگی" />
       <input id="profile-username" placeholder="نام کاربری (انگلیسی)" /><input id="profile-phone" placeholder="شماره موبایل" inputmode="tel" />
+      <input id="profile-age" type="number" min="1" max="120" inputmode="numeric" placeholder="سن (اختیاری)" />
       <p>جنسیت</p><div class="gender-options"><button type="button" data-gender="مرد">مرد</button><button type="button" data-gender="زن">زن</button></div>
       <input id="profile-password" type="password" placeholder="رمز جدید (اختیاری)" />
       <button id="save-profile" type="button">ذخیره تغییرات</button><button id="logout-button" type="button">خروج از حساب</button><button id="close-profile" class="secondary" type="button">بازگشت به خدمات</button>
@@ -269,6 +270,7 @@ function showProfile() {
   $('#profile-message').textContent = '';
   $('#profile-first').value = currentProfile.firstName || ''; $('#profile-last').value = currentProfile.lastName || '';
   $('#profile-username').value = currentProfile.username || ''; $('#profile-phone').value = currentProfile.phone || '';
+  $('#profile-age').value = currentProfile.age || '';
   profileGender = currentProfile.gender || '';
   $('#profile-panel').querySelectorAll('[data-gender]').forEach(b => b.classList.toggle('active', b.dataset.gender === profileGender));
   const img = $('#avatar-preview');
@@ -291,14 +293,15 @@ $('#save-profile').addEventListener('click', async () => {
   try {
     const accounts = readAccounts(), oldPhone = localStorage.getItem('kelid.sessionPhone'), account = accounts[oldPhone];
     if (!account) throw new Error('حساب پیدا نشد؛ دوباره وارد شو.');
-    const firstName = $('#profile-first').value.trim(), lastName = $('#profile-last').value.trim(), username = $('#profile-username').value.trim().toLowerCase(), newPhone = normalizePhone($('#profile-phone').value), password = $('#profile-password').value;
+    const firstName = $('#profile-first').value.trim(), lastName = $('#profile-last').value.trim(), username = $('#profile-username').value.trim().toLowerCase(), newPhone = normalizePhone($('#profile-phone').value), password = $('#profile-password').value, ageText = $('#profile-age').value.trim(), age = ageText ? Number(ageText) : '';
     if (!firstName || !lastName) throw new Error('نام و نام خانوادگی را وارد کن.');
     if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) throw new Error('نام کاربری باید ۳ تا ۲۰ نویسه معتبر باشد.');
     if (!profileGender) throw new Error('جنسیت را انتخاب کن.');
+    if (age !== '' && (!Number.isInteger(age) || age < 1 || age > 120)) throw new Error('سن باید بین ۱ تا ۱۲۰ باشد.');
     if (password && password.length < 8) throw new Error('رمز جدید باید حداقل ۸ نویسه باشد.');
     if (Object.entries(accounts).some(([p,a]) => p !== oldPhone && (p === newPhone || (a.username || '').toLowerCase() === username))) throw new Error('شماره یا نام کاربری قبلاً استفاده شده است.');
     const avatarImg = $('#avatar-preview');
-    const updated = {...account, firstName, lastName, username, gender: profileGender, avatar: avatarImg.dataset.changed === '1' ? avatarImg.src : (account.avatar || '')};
+    const updated = {...account, firstName, lastName, username, gender: profileGender, age, avatar: avatarImg.dataset.changed === '1' ? avatarImg.src : (account.avatar || '')};
     if (password) { const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16))); updated.salt = salt; updated.passwordHash = await hashPassword(password, salt); }
     if (newPhone !== oldPhone) delete accounts[oldPhone]; accounts[newPhone] = updated; writeAccounts(accounts); localStorage.setItem('kelid.sessionPhone', newPhone);
     currentProfile = {...updated, phone:newPhone}; $('#welcome-title').textContent = 'سلام ' + firstName + ' عزیز!'; updateWelcomeAvatar(); $('#profile-message').textContent = 'تغییرات ذخیره شد.'; showToast('پروفایل به‌روزرسانی شد.');
