@@ -54,7 +54,7 @@ app.innerHTML = `
 
     <section id="profile-panel" class="auth-wrap auth-hidden" aria-label="پروفایل">
       <h2>پروفایل من</h2>
-      <div class="avatar-area"><img id="avatar-preview" alt="عکس پروفایل" /><label for="avatar-file" class="avatar-pick">انتخاب عکس</label><input id="avatar-file" type="file" accept="image/*" hidden /></div>
+      <div class="avatar-area"><div class="avatar-frame"><img id="avatar-preview" alt="" /><span id="avatar-placeholder">👤</span></div><label for="avatar-file" class="avatar-pick">انتخاب عکس</label><input id="avatar-file" type="file" accept="image/*" hidden /></div>
       <div id="profile-message" role="status"></div>
       <input id="profile-first" placeholder="نام" /><input id="profile-last" placeholder="نام خانوادگی" />
       <input id="profile-username" placeholder="نام کاربری (انگلیسی)" /><input id="profile-phone" placeholder="شماره موبایل" inputmode="tel" />
@@ -271,7 +271,7 @@ function showProfile() {
   $('#profile-username').value = currentProfile.username || ''; $('#profile-phone').value = currentProfile.phone || '';
   profileGender = currentProfile.gender || '';
   $('#profile-panel').querySelectorAll('[data-gender]').forEach(b => b.classList.toggle('active', b.dataset.gender === profileGender));
-  const img = $('#avatar-preview'); img.src = currentProfile.avatar || ''; img.classList.toggle('has-avatar', !!currentProfile.avatar);
+  const img = $('#avatar-preview');\n  const savedAvatar = typeof currentProfile.avatar === 'string' ? currentProfile.avatar : '';\n  img.onerror = () => { img.classList.remove('has-avatar'); $('#avatar-placeholder').classList.remove('hidden'); };\n  img.onload = () => { img.classList.add('has-avatar'); $('#avatar-placeholder').classList.add('hidden'); };\n  img.classList.remove('has-avatar');\n  $('#avatar-placeholder').classList.toggle('hidden', !savedAvatar);\n  if (savedAvatar) { img.src = savedAvatar; } else { img.removeAttribute('src'); $('#avatar-placeholder').classList.remove('hidden'); }
 }
 $('#profile-button').addEventListener('click', showProfile);
 $('#close-profile').addEventListener('click', () => { $('#profile-panel').classList.add('auth-hidden'); home.classList.remove('auth-hidden'); });
@@ -279,7 +279,7 @@ $('#profile-panel').querySelectorAll('[data-gender]').forEach(b => b.addEventLis
 $('#avatar-file').addEventListener('change', () => {
   const file = $('#avatar-file').files?.[0]; if (!file) return;
   if (!file.type.startsWith('image/') || file.size > 700 * 1024) { $('#profile-message').textContent = 'فقط عکس تا حجم ۷۰۰ کیلوبایت انتخاب کن.'; return; }
-  const reader = new FileReader(); reader.onload = () => { const img = $('#avatar-preview'); img.src = reader.result; img.dataset.changed = '1'; img.classList.add('has-avatar'); }; reader.readAsDataURL(file);
+  const reader = new FileReader(); reader.onload = () => { const img = $('#avatar-preview'); img.onload = () => { img.classList.add('has-avatar'); $('#avatar-placeholder').classList.add('hidden'); }; img.onerror = () => { $('#profile-message').textContent = 'نمایش این عکس ممکن نشد؛ عکس دیگری انتخاب کن.'; }; img.src = reader.result; img.dataset.changed = '1'; }; reader.readAsDataURL(file);
 });
 $('#save-profile').addEventListener('click', async () => {
   try {
@@ -291,10 +291,10 @@ $('#save-profile').addEventListener('click', async () => {
     if (!profileGender) throw new Error('جنسیت را انتخاب کن.');
     if (password && password.length < 8) throw new Error('رمز جدید باید حداقل ۸ نویسه باشد.');
     if (Object.entries(accounts).some(([p,a]) => p !== oldPhone && (p === newPhone || (a.username || '').toLowerCase() === username))) throw new Error('شماره یا نام کاربری قبلاً استفاده شده است.');
-    const updated = {...account, firstName, lastName, username, gender: profileGender, avatar: $('#avatar-preview').dataset.changed === '1' ? $('#avatar-preview').src : (account.avatar || '')};
+    const avatarImg = $('#avatar-preview');\n    const updated = {...account, firstName, lastName, username, gender: profileGender, avatar: avatarImg.dataset.changed === '1' ? avatarImg.src : (account.avatar || '')};
     if (password) { const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16))); updated.salt = salt; updated.passwordHash = await hashPassword(password, salt); }
     if (newPhone !== oldPhone) delete accounts[oldPhone]; accounts[newPhone] = updated; writeAccounts(accounts); localStorage.setItem('kelid.sessionPhone', newPhone);
-    currentProfile = {...updated, phone:newPhone}; $('#welcome-title').textContent = 'سلام ' + firstName + ' عزیز!'; $('#profile-message').textContent = 'تغییرات ذخیره شد.'; showToast('پروفایل به‌روزرسانی شد.');
+    currentProfile = {...updated, phone:newPhone}; $('#welcome-title').textContent = 'سلام ' + firstName + ' عزیز!'; updateWelcomeAvatar(); $('#profile-message').textContent = 'تغییرات ذخیره شد.'; showToast('پروفایل به‌روزرسانی شد.');
   } catch (e) { $('#profile-message').textContent = e.message || 'ذخیره انجام نشد.'; }
 });
 $('#show-signup').addEventListener('click', () => showForm('signup'));
@@ -375,6 +375,18 @@ grid.addEventListener('click', async (event) => {
   }
 });
 
+
+function updateWelcomeAvatar() {
+  const image = $('#welcome-avatar'), fallback = $('#welcome-avatar-fallback');
+  const avatar = currentProfile?.avatar || '';
+  image.onerror = () => { image.classList.remove('visible'); fallback.classList.remove('hidden'); };
+  image.onload = () => { image.classList.add('visible'); fallback.classList.add('hidden'); };
+  if (avatar) image.src = avatar;
+  else { image.removeAttribute('src'); image.classList.remove('visible'); }
+  fallback.textContent = currentProfile?.firstName ? currentProfile.firstName.trim().slice(0, 1) : '👤';
+  if (!avatar) fallback.classList.remove('hidden');
+}
+
 async function loadCurrentUser() {
   const phone = localStorage.getItem('kelid.sessionPhone');
   const account = phone ? readAccounts()[phone] : null;
@@ -390,6 +402,7 @@ async function loadCurrentUser() {
   $('#profile-panel').classList.add('auth-hidden');
   home.classList.remove('auth-hidden');
   $('#welcome-title').textContent = `سلام ${account.firstName} عزیز!`;
+  updateWelcomeAvatar();
   renderServices();
 }
 
