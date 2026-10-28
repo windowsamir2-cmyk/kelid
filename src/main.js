@@ -271,7 +271,13 @@ function showProfile() {
   $('#profile-username').value = currentProfile.username || ''; $('#profile-phone').value = currentProfile.phone || '';
   profileGender = currentProfile.gender || '';
   $('#profile-panel').querySelectorAll('[data-gender]').forEach(b => b.classList.toggle('active', b.dataset.gender === profileGender));
-  const img = $('#avatar-preview');\n  const savedAvatar = typeof currentProfile.avatar === 'string' ? currentProfile.avatar : '';\n  img.onerror = () => { img.classList.remove('has-avatar'); $('#avatar-placeholder').classList.remove('hidden'); };\n  img.onload = () => { img.classList.add('has-avatar'); $('#avatar-placeholder').classList.add('hidden'); };\n  img.classList.remove('has-avatar');\n  $('#avatar-placeholder').classList.toggle('hidden', !savedAvatar);\n  if (savedAvatar) { img.src = savedAvatar; } else { img.removeAttribute('src'); $('#avatar-placeholder').classList.remove('hidden'); }
+  const img = $('#avatar-preview');
+  const savedAvatar = typeof currentProfile.avatar === 'string' ? currentProfile.avatar : '';
+  img.onerror = () => { img.classList.remove('has-avatar'); $('#avatar-placeholder').classList.remove('hidden'); };
+  img.onload = () => { img.classList.add('has-avatar'); $('#avatar-placeholder').classList.add('hidden'); };
+  img.classList.remove('has-avatar');
+  $('#avatar-placeholder').classList.toggle('hidden', !savedAvatar);
+  if (savedAvatar) { img.src = savedAvatar; } else { img.removeAttribute('src'); $('#avatar-placeholder').classList.remove('hidden'); }
 }
 $('#profile-button').addEventListener('click', showProfile);
 $('#close-profile').addEventListener('click', () => { $('#profile-panel').classList.add('auth-hidden'); home.classList.remove('auth-hidden'); });
@@ -291,7 +297,8 @@ $('#save-profile').addEventListener('click', async () => {
     if (!profileGender) throw new Error('جنسیت را انتخاب کن.');
     if (password && password.length < 8) throw new Error('رمز جدید باید حداقل ۸ نویسه باشد.');
     if (Object.entries(accounts).some(([p,a]) => p !== oldPhone && (p === newPhone || (a.username || '').toLowerCase() === username))) throw new Error('شماره یا نام کاربری قبلاً استفاده شده است.');
-    const avatarImg = $('#avatar-preview');\n    const updated = {...account, firstName, lastName, username, gender: profileGender, avatar: avatarImg.dataset.changed === '1' ? avatarImg.src : (account.avatar || '')};
+    const avatarImg = $('#avatar-preview');
+    const updated = {...account, firstName, lastName, username, gender: profileGender, avatar: avatarImg.dataset.changed === '1' ? avatarImg.src : (account.avatar || '')};
     if (password) { const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16))); updated.salt = salt; updated.passwordHash = await hashPassword(password, salt); }
     if (newPhone !== oldPhone) delete accounts[oldPhone]; accounts[newPhone] = updated; writeAccounts(accounts); localStorage.setItem('kelid.sessionPhone', newPhone);
     currentProfile = {...updated, phone:newPhone}; $('#welcome-title').textContent = 'سلام ' + firstName + ' عزیز!'; updateWelcomeAvatar(); $('#profile-message').textContent = 'تغییرات ذخیره شد.'; showToast('پروفایل به‌روزرسانی شد.');
