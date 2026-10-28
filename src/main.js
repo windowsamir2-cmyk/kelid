@@ -1,15 +1,6 @@
 import { Browser } from '@capacitor/browser';
 import { Capacitor } from '@capacitor/core';
-import { createClient } from '@supabase/supabase-js';
 import './style.css';
-
-// اطلاعات پروژه Supabase
-const SUPABASE_URL = 'https://mslzwjzqpvspdapyyiwm.supabase.co';
-
-// کلید Publishable خودت را اینجا قرار بده؛ کلید Secret یا service_role نباشد.
-const SUPABASE_KEY = 'sb_publishable_GRUKb9AvE67ZDsBbAqWyjw_0PeimHq6';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const sites = [
   { name: 'تأمین اجتماعی', category: 'خدمات دولتی', url: 'https://es.tamin.ir/', icon: '🩺', color: 'mint' },
@@ -80,16 +71,6 @@ app.innerHTML = `
     }
     .auth-wrap .row { display: flex; gap: 8px; }
     .auth-wrap .row button { flex: 1; }
-    .admin-table {
-      width: 100%;
-      border-collapse: collapse;
-      direction: rtl;
-    }
-    .admin-table td, .admin-table th {
-      padding: 9px;
-      border-bottom: 1px solid #ddd;
-      text-align: right;
-    }
     .auth-hidden { display: none !important; }
   </style>
 
@@ -123,16 +104,8 @@ app.innerHTML = `
       </div>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
-        <button id="admin-button" class="auth-hidden">کاربران (ادمین)</button>
         <button id="logout-button">خروج از حساب</button>
       </div>
-
-      <section id="admin-panel" class="auth-hidden auth-wrap">
-        <h2>پنل مدیریت کاربران</h2>
-        <p id="user-count"></p>
-        <div id="user-list">در حال بارگذاری...</div>
-        <button id="close-admin" class="secondary">بازگشت به خدمات</button>
-      </section>
 
       <label class="search">
         <span>⌕</span>
@@ -218,47 +191,43 @@ function normalizePhone(value) {
   return phone;
 }
 
-function emailFromPhone(phone) {
-  return `${phone.replace(/\D/g, '')}@kelid.app`;
+function readAccounts() {
+  try {
+    return JSON.parse(localStorage.getItem('kelid.accounts.v1') || '{}');
+  } catch {
+    return {};
+  }
 }
 
+function writeAccounts(accounts) {
+  localStorage.setItem('kelid.accounts.v1', JSON.stringify(accounts));
+}
+
+function bytesToHex(bytes) {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashPassword(password, salt) {
+  const bytes = new TextEncoder().encode(salt + ':' + password);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return bytesToHex(new Uint8Array(digest));
+}
 
 function showForm(mode) {
   authMessage.textContent = '';
-
   const signup = mode === 'signup';
 
   authForm.innerHTML = `
     <h3>${signup ? 'ثبت‌نام' : 'ورود به حساب'}</h3>
-
     ${signup ? `
       <input id="first-name" placeholder="نام" autocomplete="given-name" required>
       <input id="last-name" placeholder="نام خانوادگی" autocomplete="family-name" required>
     ` : ''}
-
-    <input
-      id="phone"
-      inputmode="tel"
-      placeholder="شماره موبایل (مثلاً 09123456789)"
-      autocomplete="tel"
-      required
-    >
-
-    <input
-      id="password"
-      type="password"
-      placeholder="رمز عبور (حداقل ۸ نویسه)"
-      autocomplete="${signup ? 'new-password' : 'current-password'}"
-      required
-    >
-
+    <input id="phone" inputmode="tel" placeholder="شماره موبایل (مثلاً 09123456789)" autocomplete="tel" required>
+    <input id="password" type="password" placeholder="رمز عبور (حداقل ۸ نویسه)" autocomplete="${signup ? 'new-password' : 'current-password'}" required>
     <button id="submit-auth">${signup ? 'ساخت حساب' : 'ورود'}</button>
     <button id="back-auth" class="secondary">بازگشت</button>
-
-    <p class="hint">
-      ورود بدون پیامک انجام می‌شود؛ بنابراین مالکیت شماره تلفن تأیید نمی‌شود.
-      رمز عبورت را با دیگران به اشتراک نگذار.
-    </p>
+    <p class="hint">حساب فقط روی همین گوشی ذخیره می‌شود؛ پیامک ارسال نمی‌شود و شماره تلفن تأیید نمی‌شود. با پاک کردن اطلاعات برنامه یا حذف آن، حساب محلی ممکن است از بین برود.</p>
   `;
 
   $('#back-auth').addEventListener('click', () => {
@@ -270,84 +239,38 @@ function showForm(mode) {
     const button = $('#submit-auth');
     button.disabled = true;
     button.textContent = 'لطفاً صبر کن...';
-
     try {
       const phone = normalizePhone($('#phone').value);
       const password = $('#password').value;
+      if (password.length < 8) throw new Error('رمز عبور باید حداقل ۸ نویسه باشد.');
 
-      if (password.length < 8) {
-        throw new Error('رمز عبور باید حداقل ۸ نویسه باشد.');
-      }
-
-      const email = emailFromPhone(phone);
-
+      const accounts = readAccounts();
       if (signup) {
         const firstName = $('#first-name').value.trim();
         const lastName = $('#last-name').value.trim();
+        if (!firstName || !lastName) throw new Error('نام و نام خانوادگی را وارد کن.');
+        if (accounts[phone]) throw new Error('برای این شماره قبلاً حساب ساخته شده؛ وارد شو.');
 
-        if (!firstName || !lastName) {
-          throw new Error('نام و نام خانوادگی را وارد کن.');
-        }
-
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              first_name: firstName,
-              last_name: lastName
-            }
-          }
-        });
-
-        if (error) throw error;
-
-        if (!data.user) {
-          throw new Error('ساخت حساب انجام نشد.');
-        }
-
-        if (!data.session) {
-          showMessage(
-            'حساب ایجاد شده، اما تأیید ایمیل فعال است. تنظیمات تأیید ایمیل Supabase را بررسی کن.',
-            true
-          );
-          return;
-        }
-
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            first_name: firstName,
-            last_name: lastName,
-            phone,
-            role: 'user'
-          });
-
-        if (profileError) {
-          await supabase.auth.signOut();
-
-          throw new Error(
-            'حساب ساخته شد، اما ذخیره پروفایل ناموفق بود: ' +
-            profileError.message
-          );
-        }
+        const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+        const salt = bytesToHex(saltBytes);
+        accounts[phone] = {
+          firstName, lastName, salt,
+          passwordHash: await hashPassword(password, salt),
+          createdAt: new Date().toISOString()
+        };
+        writeAccounts(accounts);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (error) throw error;
+        const account = accounts[phone];
+        if (!account) throw new Error('برای این شماره حسابی روی این گوشی پیدا نشد.');
+        const hash = await hashPassword(password, account.salt);
+        if (hash !== account.passwordHash) throw new Error('شماره موبایل یا رمز عبور اشتباه است.');
       }
 
+      localStorage.setItem('kelid.sessionPhone', phone);
       await loadCurrentUser();
     } catch (error) {
       console.error('خطای ورود یا ثبت‌نام:', error);
-      showMessage(
-        error.message || 'مشکلی پیش آمد. دوباره تلاش کن.',
-        true
-      );
+      showMessage(error.message || 'مشکلی پیش آمد. دوباره تلاش کن.', true);
     } finally {
       button.disabled = false;
       button.textContent = signup ? 'ساخت حساب' : 'ورود';
@@ -434,157 +357,30 @@ grid.addEventListener('click', async (event) => {
 });
 
 async function loadCurrentUser() {
-  const {
-    data: { user },
-    error
-  } = await supabase.auth.getUser();
-
-  if (error) throw error;
-
-  if (!user) {
+  const phone = localStorage.getItem('kelid.sessionPhone');
+  const account = phone ? readAccounts()[phone] : null;
+  if (!account) {
     currentProfile = null;
     authBox.classList.remove('auth-hidden');
     home.classList.add('auth-hidden');
     return;
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, phone, role, created_at')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError || !profile) {
-    await supabase.auth.signOut();
-
-    authBox.classList.remove('auth-hidden');
-    home.classList.add('auth-hidden');
-
-    throw new Error(
-      'پروفایل حساب پیدا نشد: ' +
-      (profileError?.message || 'اطلاعات پروفایل موجود نیست')
-    );
-  }
-
-  currentProfile = profile;
-
+  currentProfile = { ...account, phone };
   authBox.classList.add('auth-hidden');
   home.classList.remove('auth-hidden');
-
-  $('#welcome-title').textContent =
-    `سلام ${profile.first_name} عزیز!`;
-
-  $('#admin-button').classList.toggle(
-    'auth-hidden',
-    profile.role !== 'admin'
-  );
-
-  $('#admin-panel').classList.add('auth-hidden');
-
-  // ثبت فعالیت کاربر
-  const { error: activityError } = await supabase
-    .from('activity_events')
-    .insert({
-      user_id: user.id,
-      event_type: 'app_open'
-    });
-
-  if (activityError) {
-    console.warn(
-      'ثبت فعالیت انجام نشد:',
-      activityError.message
-    );
-  }
-
+  $('#welcome-title').textContent = `سلام ${account.firstName} عزیز!`;
   renderServices();
 }
 
-$('#logout-button').addEventListener('click', async () => {
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    showToast('خروج انجام نشد: ' + error.message);
-    return;
-  }
-
+$('#logout-button').addEventListener('click', () => {
+  localStorage.removeItem('kelid.sessionPhone');
   currentProfile = null;
   authForm.innerHTML = '';
   authMessage.textContent = '';
-
   authBox.classList.remove('auth-hidden');
   home.classList.add('auth-hidden');
-});
-
-$('#admin-button').addEventListener('click', async () => {
-  if (currentProfile?.role !== 'admin') {
-    showToast('دسترسی مجاز نیست.');
-    return;
-  }
-
-  const panel = $('#admin-panel');
-  panel.classList.remove('auth-hidden');
-  $('#user-list').textContent = 'در حال بارگذاری...';
-
-  const { data: profiles, error: profilesError } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, phone, role, created_at')
-    .order('created_at', { ascending: false });
-
-  if (profilesError) {
-    $('#user-list').textContent =
-      'دریافت کاربران ناموفق بود: ' + profilesError.message;
-    return;
-  }
-
-  const since = new Date(
-    Date.now() - 5 * 60 * 1000
-  ).toISOString();
-
-  const { data: recent, error: activityError } = await supabase
-    .from('activity_events')
-    .select('user_id')
-    .gte('created_at', since);
-
-  const activeIds = new Set(
-    (recent || []).map((event) => event.user_id)
-  );
-
-  $('#user-count').textContent =
-    `تعداد حساب‌ها: ${profiles.length} | فعال در ۵ دقیقه اخیر: ${
-      activityError ? 'نامشخص' : activeIds.size
-    }`;
-
-  $('#user-list').innerHTML = `
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>نام</th>
-          <th>موبایل</th>
-          <th>نقش</th>
-          <th>وضعیت</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${profiles.map((p) => `
-          <tr>
-            <td>${escapeHtml(`${p.first_name} ${p.last_name}`)}</td>
-            <td>${escapeHtml(p.phone || '')}</td>
-            <td>${p.role === 'admin' ? 'ادمین' : 'کاربر'}</td>
-            <td>${activeIds.has(p.id) ? 'فعال' : 'غیرفعال'}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-    ${
-      activityError
-        ? '<p>وضعیت فعالیت به دلیل محدودیت دسترسی قابل خواندن نیست.</p>'
-        : ''
-    }
-  `;
-});
-
-$('#close-admin').addEventListener('click', () => {
-  $('#admin-panel').classList.add('auth-hidden');
+  showToast('از حساب خارج شدی.');
 });
 
 function escapeHtml(value) {
@@ -612,35 +408,8 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-// اگر نشست قبلی معتبر باشد، کاربر خودکار وارد می‌شود.
-supabase.auth.onAuthStateChange((event) => {
-  if (event === 'SIGNED_OUT') {
-    currentProfile = null;
-    authBox.classList.remove('auth-hidden');
-    home.classList.add('auth-hidden');
-  }
-});
-
-// نمایش علت واقعی خطا به‌جای پیام کلی اتصال ناموفق
+// نشست محلی روی همین گوشی نگه داشته می‌شود؛ برای خروج از حساب، دکمه خروج را بزن.
 loadCurrentUser().catch((error) => {
-  console.error('خطا در بارگذاری حساب:', error);
-
-  const message = String(
-    error?.message || error || 'خطای ناشناخته'
-  );
-
-  let help = '';
-
-  if (/failed to fetch|network|fetch/i.test(message)) {
-    help =
-      ' اینترنت گوشی و دسترسی شبکه به Supabase را بررسی کن.';
-  } else if (/invalid api key|api key|jwt/i.test(message)) {
-    help =
-      ' کلید Publishable کامل و آدرس پروژه را در src/main.js بررسی کن.';
-  } else if (/permission|row.level security|not allowed/i.test(message)) {
-    help =
-      ' سیاست‌های دسترسی RLS جدول‌های Supabase را بررسی کن.';
-  }
-
-  showMessage(`خطای اتصال: ${message}.${help}`, true);
+  console.error('خطا در بارگذاری حساب محلی:', error);
+  showMessage('خواندن اطلاعات محلی ممکن نشد. فضای ذخیره‌سازی برنامه را بررسی کن.', true);
 });
