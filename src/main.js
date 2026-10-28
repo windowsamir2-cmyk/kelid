@@ -52,6 +52,17 @@ app.innerHTML = `
       <div id="auth-message" role="status"></div>
     </section>
 
+    <section id="profile-panel" class="auth-wrap auth-hidden" aria-label="پروفایل">
+      <h2>پروفایل من</h2>
+      <div class="avatar-area"><img id="avatar-preview" alt="عکس پروفایل" /><label for="avatar-file" class="avatar-pick">انتخاب عکس</label><input id="avatar-file" type="file" accept="image/*" hidden /></div>
+      <div id="profile-message" role="status"></div>
+      <input id="profile-first" placeholder="نام" /><input id="profile-last" placeholder="نام خانوادگی" />
+      <input id="profile-username" placeholder="نام کاربری (انگلیسی)" /><input id="profile-phone" placeholder="شماره موبایل" inputmode="tel" />
+      <p>جنسیت</p><div class="gender-options"><button type="button" data-gender="مرد">مرد</button><button type="button" data-gender="زن">زن</button></div>
+      <input id="profile-password" type="password" placeholder="رمز جدید (اختیاری)" />
+      <button id="save-profile" type="button">ذخیره تغییرات</button><button id="close-profile" class="secondary" type="button">بازگشت به خدمات</button>
+    </section>
+
     <section id="home" class="auth-hidden">
       <div class="welcome">
         <div>
@@ -63,7 +74,7 @@ app.innerHTML = `
       </div>
 
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">
-        <button id="logout-button">خروج از حساب</button>
+        <button id="profile-button" type="button">👤 پروفایل</button><button id="logout-button">خروج از حساب</button>
       </div>
 
       <label class="search">
@@ -116,6 +127,8 @@ const toast = $('#toast');
 let selectedCategory = 'همه';
 let currentProfile = null;
 let toastTimer;
+let signupGender = '';
+let profileGender = '';
 
 function showMessage(message, error = false) {
   authMessage.className = `msg ${error ? 'error' : 'ok'}`;
@@ -183,8 +196,10 @@ function showForm(mode) {
     ${signup ? `
       <input id="first-name" placeholder="نام" autocomplete="given-name" required>
       <input id="last-name" placeholder="نام خانوادگی" autocomplete="family-name" required>
+      <input id="username" placeholder="نام کاربری (۳ تا ۲۰ نویسه انگلیسی)" autocomplete="username" required>
+      <div class="gender-options signup-gender"><button type="button" data-signup-gender="مرد">مرد</button><button type="button" data-signup-gender="زن">زن</button></div>
     ` : ''}
-    <input id="phone" inputmode="tel" placeholder="شماره موبایل (مثلاً 09123456789)" autocomplete="tel" required>
+    <input id="phone" inputmode="tel" placeholder="${signup ? 'شماره موبایل (مثلاً 09123456789)' : 'شماره موبایل یا نام کاربری'}" autocomplete="${signup ? 'tel' : 'username'}" required>
     <input id="password" type="password" placeholder="رمز عبور (حداقل ۸ نویسه)" autocomplete="${signup ? 'new-password' : 'current-password'}" required>
     <button id="submit-auth">${signup ? 'ساخت حساب' : 'ورود'}</button>
     <button id="back-auth" class="secondary">بازگشت</button>
@@ -201,12 +216,18 @@ function showForm(mode) {
     button.disabled = true;
     button.textContent = 'لطفاً صبر کن...';
     try {
-      const phone = normalizePhone($('#phone').value);
+      const identifier = $('#phone').value.trim();
       const password = $('#password').value;
       if (password.length < 8) throw new Error('رمز عبور باید حداقل ۸ نویسه باشد.');
 
       const accounts = readAccounts();
+      let phone = '';
       if (signup) {
+        phone = normalizePhone(identifier);
+        const username = $('#username').value.trim().toLowerCase();
+        if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) throw new Error('نام کاربری باید ۳ تا ۲۰ نویسه انگلیسی، عدد یا . _ - باشد.');
+        if (!signupGender) throw new Error('جنسیت را انتخاب کن.');
+        if (Object.values(accounts).some((a) => (a.username || '').toLowerCase() === username)) throw new Error('این نام کاربری قبلاً استفاده شده است.');
         const firstName = $('#first-name').value.trim();
         const lastName = $('#last-name').value.trim();
         if (!firstName || !lastName) throw new Error('نام و نام خانوادگی را وارد کن.');
@@ -215,14 +236,15 @@ function showForm(mode) {
         const saltBytes = crypto.getRandomValues(new Uint8Array(16));
         const salt = bytesToHex(saltBytes);
         accounts[phone] = {
-          firstName, lastName, salt,
+          firstName, lastName, username, gender: signupGender, avatar: '', salt,
           passwordHash: await hashPassword(password, salt),
           createdAt: new Date().toISOString()
         };
         writeAccounts(accounts);
       } else {
-        const account = accounts[phone];
-        if (!account) throw new Error('برای این شماره حسابی روی این گوشی پیدا نشد.');
+        try { phone = normalizePhone(identifier); } catch { const found = Object.entries(accounts).find(([, a]) => (a.username || '').toLowerCase() === identifier.toLowerCase()); phone = found ? found[0] : ''; }
+        const account = phone ? accounts[phone] : null;
+        if (!account) throw new Error('حسابی با این شماره یا نام کاربری روی این گوشی پیدا نشد.');
         const hash = await hashPassword(password, account.salt);
         if (hash !== account.passwordHash) throw new Error('شماره موبایل یا رمز عبور اشتباه است.');
       }
@@ -240,7 +262,43 @@ function showForm(mode) {
 }
 
 $('#show-login').addEventListener('click', () => showForm('login'));
+
+function showProfile() {
+  if (!currentProfile) return;
+  home.classList.add('auth-hidden'); $('#profile-panel').classList.remove('auth-hidden');
+  $('#profile-message').textContent = '';
+  $('#profile-first').value = currentProfile.firstName || ''; $('#profile-last').value = currentProfile.lastName || '';
+  $('#profile-username').value = currentProfile.username || ''; $('#profile-phone').value = currentProfile.phone || '';
+  profileGender = currentProfile.gender || '';
+  $('#profile-panel').querySelectorAll('[data-gender]').forEach(b => b.classList.toggle('active', b.dataset.gender === profileGender));
+  const img = $('#avatar-preview'); img.src = currentProfile.avatar || ''; img.classList.toggle('has-avatar', !!currentProfile.avatar);
+}
+$('#profile-button').addEventListener('click', showProfile);
+$('#close-profile').addEventListener('click', () => { $('#profile-panel').classList.add('auth-hidden'); home.classList.remove('auth-hidden'); });
+$('#profile-panel').querySelectorAll('[data-gender]').forEach(b => b.addEventListener('click', () => { profileGender = b.dataset.gender; $('#profile-panel').querySelectorAll('[data-gender]').forEach(x => x.classList.toggle('active', x === b)); }));
+$('#avatar-file').addEventListener('change', () => {
+  const file = $('#avatar-file').files?.[0]; if (!file) return;
+  if (!file.type.startsWith('image/') || file.size > 700 * 1024) { $('#profile-message').textContent = 'فقط عکس تا حجم ۷۰۰ کیلوبایت انتخاب کن.'; return; }
+  const reader = new FileReader(); reader.onload = () => { const img = $('#avatar-preview'); img.src = reader.result; img.dataset.changed = '1'; img.classList.add('has-avatar'); }; reader.readAsDataURL(file);
+});
+$('#save-profile').addEventListener('click', async () => {
+  try {
+    const accounts = readAccounts(), oldPhone = localStorage.getItem('kelid.sessionPhone'), account = accounts[oldPhone];
+    if (!account) throw new Error('حساب پیدا نشد؛ دوباره وارد شو.');
+    const firstName = $('#profile-first').value.trim(), lastName = $('#profile-last').value.trim(), username = $('#profile-username').value.trim().toLowerCase(), newPhone = normalizePhone($('#profile-phone').value), password = $('#profile-password').value;
+    if (!firstName || !lastName) throw new Error('نام و نام خانوادگی را وارد کن.');
+    if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) throw new Error('نام کاربری باید ۳ تا ۲۰ نویسه معتبر باشد.');
+    if (!profileGender) throw new Error('جنسیت را انتخاب کن.');
+    if (password && password.length < 8) throw new Error('رمز جدید باید حداقل ۸ نویسه باشد.');
+    if (Object.entries(accounts).some(([p,a]) => p !== oldPhone && (p === newPhone || (a.username || '').toLowerCase() === username))) throw new Error('شماره یا نام کاربری قبلاً استفاده شده است.');
+    const updated = {...account, firstName, lastName, username, gender: profileGender, avatar: $('#avatar-preview').dataset.changed === '1' ? $('#avatar-preview').src : (account.avatar || '')};
+    if (password) { const salt = bytesToHex(crypto.getRandomValues(new Uint8Array(16))); updated.salt = salt; updated.passwordHash = await hashPassword(password, salt); }
+    if (newPhone !== oldPhone) delete accounts[oldPhone]; accounts[newPhone] = updated; writeAccounts(accounts); localStorage.setItem('kelid.sessionPhone', newPhone);
+    currentProfile = {...updated, phone:newPhone}; $('#welcome-title').textContent = 'سلام ' + firstName + ' عزیز!'; $('#profile-message').textContent = 'تغییرات ذخیره شد.'; showToast('پروفایل به‌روزرسانی شد.');
+  } catch (e) { $('#profile-message').textContent = e.message || 'ذخیره انجام نشد.'; }
+});
 $('#show-signup').addEventListener('click', () => showForm('signup'));
+authForm.addEventListener('click', (event) => { const b = event.target.closest('[data-signup-gender]'); if (!b) return; signupGender = b.dataset.signupGender; authForm.querySelectorAll('[data-signup-gender]').forEach(x => x.classList.toggle('active', x === b)); });
 
 function renderServices() {
   const query = search.value.trim().toLocaleLowerCase('fa');
@@ -329,6 +387,7 @@ async function loadCurrentUser() {
 
   currentProfile = { ...account, phone };
   authBox.classList.add('auth-hidden');
+  $('#profile-panel').classList.add('auth-hidden');
   home.classList.remove('auth-hidden');
   $('#welcome-title').textContent = `سلام ${account.firstName} عزیز!`;
   renderServices();
