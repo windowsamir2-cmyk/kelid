@@ -32,3 +32,18 @@ body{min-width:320px;background:radial-gradient(ellipse at 50% 0%,#073c88 0,tran
 .operator-wordmark{font-weight:900;letter-spacing:-.7px;font-size:11px;text-align:center;direction:ltr}.operator-wordmark.mci{font-size:13px;color:#fff;border-bottom:3px solid #00b8ff;padding:3px}.operator-wordmark.irancell{font-size:10px;color:#142d5c}.operator-wordmark.rightel{font-size:12px;color:#fff}
 .empty{color:#8fb7e6}footer{color:#7fa6d5}.footer-dot{background:#16d9ff}.toast{background:#06264b;border:1px solid #168cff;color:#fff;box-shadow:0 0 20px #007bff33}
 @media(max-width:370px){.auth-hero h2{font-size:32px}.key-orb{width:96px;height:96px;font-size:58px}.auth-wrap{margin:20px auto}}
+
+/* Profile panel and gender controls */
+#profile-button,#logout-button{width:auto;flex:1;padding:10px 15px;border-radius:13px;border:1px solid #168cff;background:linear-gradient(120deg,#064bb5,#087cff);color:#fff;box-shadow:0 0 14px #007bff30}
+#profile-panel h2{text-align:center;color:#fff;text-shadow:0 0 14px #168dff}
+#profile-panel input{display:block;width:100%;margin:8px 0;padding:13px;border-radius:13px;border:1px solid #286bc0;background:#041a3c;color:#fff}
+#profile-panel input::placeholder{color:#82a7d5}
+.avatar-area{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0 18px}
+#avatar-preview{width:100px;height:100px;border-radius:50%;object-fit:cover;background:#061a3b;border:2px dashed #18cfff;box-shadow:0 0 22px #007bff50}
+#avatar-preview:not(.has-avatar){visibility:hidden}
+.avatar-pick{display:inline-block;padding:9px 16px;border:1px solid #18cfff;border-radius:12px;color:#bfeaff;background:#062653;cursor:pointer}
+.gender-label{display:block;margin-top:14px;color:#bfeaff}
+.gender-options{display:flex;gap:10px;margin:8px 0 14px}
+.gender-options button{flex:1;background:#061a3b;color:#9ecbff;border:1px solid #174b8b;box-shadow:none}
+.gender-options button.active{background:linear-gradient(120deg,#0069ff,#087bff);border-color:#22d7ff;color:#fff;box-shadow:0 0 15px #008cff55}
+.signup-gender{margin:4px 0 10px}
