@@ -1,6 +1,6 @@
 {
   "appId": "ir.rahnama.app",
-  "appName": "کلید",
+  "appName": "KELID",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"
